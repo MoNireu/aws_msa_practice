@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Mamago 번역기</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col align-self-center">
+            <div style="display: inline-block;">
+                <img src="https://bucket-translate-service-hosting-html.s3.ap-northeast-2.amazonaws.com/mamago.png" style="width: 70px; margin-top: 20px; margin-bottom: 20px;">
+                <label style="vertical-align: middle;font-family: 'Outfit', sans-serif; font-size: 50px;">Mamago</label>
+            </div>
+            <form action="javascript:void(0)">
+                <label>번역할 문장을 입력해주세요.</label>
+                <div class="form-group">
+                    <!-- <label for="langs"></label> -->
+                    <select name="langs" id="top_langs_selector" onchange="onChangeTop(this)" style="font-size: xx-large; border: 0px; margin-bottom: 10px;">
+                        <option value="ko">한국어</option>
+                        <option value="en">영어</option>
+                        <option value="ja">일본어</option>
+                    </select>
+                    <textarea class="form-control" id="textInput" rows="3"></textarea>
+                </div>
+            </form>
+            <div>
+                <label id="warningText" style="color: red;"></label>
+                <div style="display: inline; float: right;">
+                <!-- <button onclick="swapLang()" class="btn btn-primary">교체</button> -->
+                <button onclick="sendReqeust()" class="btn btn-primary" id="translate_btn">번역</button>
+            </div>
+            </div>
+            </form>
+            <form action="javascript:void(0)" style="clear: both; margin-top: 50px;">
+                <div class="form-group">
+                    <!-- <label style="font-size: xx-large;">영어</label> -->
+                    <select name="langs" id="bot_langs_selector" onchange="onChangeBot(this)" style="font-size: xx-large; border: 0px; margin-bottom: 10px;">
+                        <option value="en">영어</option>
+                        <option value="ko">한국어</option>
+                        <option value="ja">일본어</option>
+                    </select>
+                    <textarea class="form-control" id="resultText" rows="3" onChange="onChangeResult(this)" readonly></textarea>
+                </div>
+            </form>
+            <button onclick="readTranslate()" class="btn btn-primary" id="read_btn" style="float: right;">발음 재생</button>
+        </div>
+    </div>
+</div>
+
+</body>
+<script type="text/javascript">
+    var inputSelector = document.querySelector('#textInput');
+    var resultText = document.querySelector('#resultText');
+    var warningText = document.querySelector('#warningText');
+    var topSelector = document.querySelector('#top_langs_selector');
+    var botSelector = document.querySelector('#bot_langs_selector');
+    var translateBtn = document.querySelector('#translate_btn');
+    var readBtn = document.querySelector('#read_btn');
+    var audio = document.querySelector('#audio');
+
+
+    function onChangeTop(topSelector) {
+        if (topSelector.value == botSelector.value) {
+            warningText.innerHTML = "같은 언어로 번역 할 수 없습니다. 다른 언어를 선택해주세요."
+            translateBtn.disabled = true
+        }
+        else {
+            warningText.innerHTML = ""   
+            translateBtn.disabled = false
+        }
+    }
+
+    function onChangeBot(botSelector) {
+        if (topSelector.value == botSelector.value) {
+            warningText.innerHTML = "같은 언어로 번역 할 수 없습니다. 다른 언어를 선택해주세요."
+            translateBtn.disabled = true
+        }
+        else {
+            warningText.innerHTML = ""   
+            translateBtn.disabled = false
+        }
+        sendReqeust()
+    }
+
+
+    function sendReqeust() {
+        resultText.innerHTML = "로딩중..."
+        fetch("https://wijsgpzki9.execute-api.ap-northeast-2.amazonaws.com/default/lambda_for_translate_service", {
+            method: "POST",
+            body: JSON.stringify({
+                from: topSelector.value,
+                to: botSelector.value,
+                text:inputSelector.value
+            })
+        }).then(function (response) {
+          return response.text().then(function(text) {
+                resultText.innerHTML = text;
+          });
+        })
+    }
+
+
+    function readTranslate() {
+        readBtn.disabled = true
+        var voice = 'Joanna'
+        if (botSelector.value == 'en') {
+            voice = 'Joanna'
+        }
+        else if (botSelector.value == 'ko') {
+            voice = 'Seoyeon'
+        }
+        else {
+            voice = 'Mizuki'
+        }
+        fetch("https://wijsgpzki9.execute-api.ap-northeast-2.amazonaws.com/default/lambda_for_polly_reading_translate", {
+            method: "POST",
+            body: JSON.stringify({
+                voice: voice,
+                text:resultText.value
+            })
+        }).then(function (response) {
+            readBtn.disabled = false
+            return response.text().then(function(text) {
+                var audio = new Audio(text + "?cb=" + new Date().getTime());
+                audio.load();
+                audio.play();
+          });
+        })
+    }
+
+</script>
+</html>
