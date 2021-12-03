@@ -21,7 +21,6 @@
             <form action="javascript:void(0)">
                 <label>번역할 문장을 입력해주세요.</label>
                 <div class="form-group">
-                    <!-- <label for="langs"></label> -->
                     <select name="langs" id="top_langs_selector" onchange="onChangeTop(this)" style="font-size: xx-large; border: 0px; margin-bottom: 10px;">
                         <option value="ko">한국어</option>
                         <option value="en">영어</option>
@@ -33,14 +32,12 @@
             <div>
                 <label id="warningText" style="color: red;"></label>
                 <div style="display: inline; float: right;">
-                <!-- <button onclick="swapLang()" class="btn btn-primary">교체</button> -->
                 <button onclick="sendReqeust()" class="btn btn-primary" id="translate_btn">번역</button>
             </div>
             </div>
             </form>
             <form action="javascript:void(0)" style="clear: both; margin-top: 50px;">
                 <div class="form-group">
-                    <!-- <label style="font-size: xx-large;">영어</label> -->
                     <select name="langs" id="bot_langs_selector" onchange="onChangeBot(this)" style="font-size: xx-large; border: 0px; margin-bottom: 10px;">
                         <option value="en">영어</option>
                         <option value="ko">한국어</option>
